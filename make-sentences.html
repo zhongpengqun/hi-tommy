@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="https://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
+</head>
+<body>
+    <center><image id="random_image" src="" height="400" width="400" hidden></image></center>
+    <br><br>
+    <div id="board"></div>
+
+    <a onclick="add_vocabularies_setting()">+(add a set of vocabularies)</a>
+    &nbsp;&nbsp;&nbsp;
+    <button onclick="submit();">Get random vocabularies</button>
+    <br>
+    <div id="setting">
+
+    <br>
+    <a>Select images</a><br>
+    <input type="file" name="client-file" id="get-files" multiple />
+    <br><br>
+</body>
+<script>
+current_setting_count = 0
+
+settings = {}
+
+function show_submit() {
+    if(current_setting_count != 0 && !document.getElementById('submit_btn')) {
+        $("#end").append("<button id='submit_btn'>Submit</button>")
+    }
+}
+
+function add_vocabularies_setting() {
+    current_setting_count = current_setting_count + 1
+    $("#setting").append(current_setting_count + '<br>' + '<textarea id="vocabularies_' + current_setting_count + '" rows="10" cols="200" onBlur="update_select('+ current_setting_count +');">Please input the vocabularies, separate them by comma.f.e  hello,are,you,world </textarea><br><select onblur="selected(this, ' + current_setting_count + ');" id="vocabularies_count_pop_' + current_setting_count + '"><option value="" disabled selected>How many vocabularies you want to pop per round</option></select><br><br><br>')
+
+    show_submit()
+}
+
+function update_select(var_current_setting_count) {
+    vocabularies = document.getElementById('vocabularies_' + var_current_setting_count).value
+    var vs = vocabularies.split(",");
+
+    settings[current_setting_count] = {"vocabularies": vs}
+
+    $("#vocabularies_count_pop_" + var_current_setting_count).html("<option value='' disabled selected>How many vocabularies you want to pop per round</option>")
+    for (var i=1; i < vs.length; i++)
+    {
+        $("#vocabularies_count_pop_" + var_current_setting_count).append("<option value='" + i + "'> " + i + " </option>")
+    }
+}
+
+function selected(thx, var_current_setting_count){
+    settings[var_current_setting_count]["select_pop"] = $(thx).val()
+    console.log(settings)
+}
+
+current_image_index = 0
+function show_random_image(){
+    images = []
+    var inp = document.getElementById("get-files");
+
+    for (i = 0; i < inp.files.length; i++) {
+        let file = inp.files[i];
+        images.push("put-pics-here/"+file.name)
+    }
+
+    console.log('--------')
+    console.log(images)
+    console.log('========')
+
+    if (images.length == 0){
+        alert("No images selected! Please select images from `put-pics-here` folder.")
+        return
+    }
+
+
+    random_image = images[current_image_index]
+    document.getElementById("random_image").src=random_image;
+    document.getElementById("random_image").style.display="block";
+
+    current_image_index = current_image_index + 1
+    if (current_image_index == images.length){
+        current_image_index = 0
+    }
+}
+
+function submit() {
+    $("#board").html("")
+
+    for (var key in settings) {
+       poppeds = []
+    　　var item = settings[key];
+
+       for (var i=1; i <= item['select_pop']; i++){
+            popped_success = 0
+            while (!popped_success){
+               random_index = Math.round(Math.random()*item['vocabularies'].length)
+            　　console.log('select_pop:');
+            　　console.log(item['select_pop']);
+               will_be_popped = item['vocabularies'][Math.abs(random_index - 1)]
+            　　console.log(will_be_popped);
+               if (!poppeds.includes(will_be_popped)) {
+                   popped_success = 1
+                   poppeds.push(will_be_popped)
+               }
+            }
+
+        　　console.log('poppeds:');
+        　　console.log(poppeds);
+       }
+
+       $("#board").append("<h3 style='color: blue'>" + poppeds.join(",       ") + "</h3>")
+       $("#board").append("<br><br>")
+
+    }
+
+    show_random_image();
+}
+</script>
+</html>
